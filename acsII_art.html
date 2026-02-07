@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>圖片轉 ASCII Art 工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d9ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .width-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .width-section label {
+            font-size: 1rem;
+            color: #aaa;
+        }
+
+        .width-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .width-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 2px solid transparent;
+        }
+
+        .width-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .width-btn.active {
+            background: linear-gradient(135deg, #00d9ff 0%, #00ff88 100%);
+            color: #1a1a2e;
+            border-color: #00ff88;
+        }
+
+        .char-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .char-section label {
+            font-size: 1rem;
+            color: #aaa;
+        }
+
+        #charSet {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .preview-section {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .preview-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .preview-box h3 {
+            margin-bottom: 10px;
+            color: #aaa;
+        }
+
+        #previewImage {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .output-container {
+            background: #0a0a0a;
+            border-radius: 15px;
+            padding: 20px;
+            overflow: auto;
+            max-height: 80vh;
+        }
+
+        #asciiOutput {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 6px;
+            line-height: 6px;
+            letter-spacing: 0px;
+            white-space: pre;
+            display: inline-block;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #aaa;
+            font-size: 1.2rem;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .font-size-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .font-size-section label {
+            font-size: 1rem;
+            color: #aaa;
+        }
+
+        #fontSizeSlider {
+            width: 150px;
+            accent-color: #00d9ff;
+        }
+
+        .slider-value {
+            color: #00d9ff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 圖片轉 ASCII Art 工具</h1>
+        
+        <div class="controls">
+            <div class="upload-section">
+                <label class="upload-label" for="imageInput">
+                    📁 選擇圖片
+                </label>
+                <input type="file" id="imageInput" accept="image/*">
+                <span id="fileName" style="color: #aaa; font-size: 0.9rem;">尚未選擇檔案</span>
+            </div>
+
+            <div class="width-section">
+                <label>輸出寬度</label>
+                <div class="width-buttons">
+                    <button class="width-btn" data-width="100">100</button>
+                    <button class="width-btn active" data-width="200">200</button>
+                    <button class="width-btn" data-width="300">300</button>
+                </div>
+            </div>
+
+            <div class="char-section">
+                <label>字元集</label>
+                <select id="charSet">
+                    <option value="standard">標準 (@%#*+=-:. )</option>
+                    <option value="detailed">細緻 ($@B%8&WM#...)</option>
+                    <option value="blocks">方塊 (█▓▒░ )</option>
+                    <option value="simple">簡單 (#. )</option>
+                </select>
+            </div>
+
+            <div class="font-size-section">
+                <label>字體大小: <span class="slider-value" id="fontSizeValue">6px</span></label>
+                <input type="range" id="fontSizeSlider" min="3" max="12" value="6">
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <div class="preview-box">
+                <h3>原圖預覽</h3>
+                <img id="previewImage" alt="預覽圖片">
+            </div>
+        </div>
+
+        <div class="output-container">
+            <div id="asciiOutput">
+                <div style="text-align: center; color: #666; padding: 50px;">
+                    👆 請上傳一張圖片開始轉換
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-btn copy-btn" id="copyBtn">📋 複製純文字</button>
+            <button class="action-btn download-btn" id="downloadBtn">💾 下載 HTML</button>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        // 字元集定義
+        const charSets = {
+            standard: '@%#*+=-:. '.split('').reverse(),
+            detailed: '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. '.split('').reverse(),
+            blocks: '█▓▒░ '.split('').reverse(),
+            simple: '#. '.split('').reverse()
+        };
+
+        let currentWidth = 200;
+        let currentImage = null;
+
+        // DOM 元素
+        const imageInput = document.getElementById('imageInput');
+        const previewImage = document.getElementById('previewImage');
+        const asciiOutput = document.getElementById('asciiOutput');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const widthButtons = document.querySelectorAll('.width-btn');
+        const charSetSelect = document.getElementById('charSet');
+        const fontSizeSlider = document.getElementById('fontSizeSlider');
+        const fontSizeValue = document.getElementById('fontSizeValue');
+        const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const fileName = document.getElementById('fileName');
+
+        // 寬度按鈕事件
+        widthButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                widthButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentWidth = parseInt(btn.dataset.width);
+                if (currentImage) {
+                    convertToAscii();
+                }
+            });
+        });
+
+        // 字元集變更事件
+        charSetSelect.addEventListener('change', () => {
+            if (currentImage) {
+                convertToAscii();
+            }
+        });
+
+        // 字體大小滑桿事件
+        fontSizeSlider.addEventListener('input', () => {
+            const size = fontSizeSlider.value;
+            fontSizeValue.textContent = size + 'px';
+            asciiOutput.style.fontSize = size + 'px';
+            asciiOutput.style.lineHeight = size + 'px';
+        });
+
+        // 圖片上傳事件
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        currentImage = img;
+                        previewImage.src = event.target.result;
+                        previewImage.style.display = 'block';
+                        convertToAscii();
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 轉換為 ASCII Art
+        function convertToAscii() {
+            if (!currentImage) return;
+
+            asciiOutput.innerHTML = '<div class="loading">正在轉換中</div>';
+
+            setTimeout(() => {
+                const chars = charSets[charSetSelect.value];
+                const width = currentWidth;
+                const aspectRatio = currentImage.height / currentImage.width;
+                // ASCII 字元高度約為寬度的 2 倍，所以要調整
+                const height = Math.floor(width * aspectRatio * 0.5);
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(currentImage, 0, 0, width, height);
+
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const pixels = imageData.data;
+
+                let asciiHtml = '';
+
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const i = (y * width + x) * 4;
+                        const r = pixels[i];
+                        const g = pixels[i + 1];
+                        const b = pixels[i + 2];
+                        const a = pixels[i + 3];
+
+                        // 計算亮度
+                        const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                        
+                        // 根據亮度選擇字元
+                        const charIndex = Math.floor(brightness * (chars.length - 1));
+                        const char = chars[charIndex] === ' ' ? '&nbsp;' : chars[charIndex];
+
+                        // 如果是透明的，用空格
+                        if (a < 128) {
+                            asciiHtml += '<span>&nbsp;</span>';
+                        } else {
+                            asciiHtml += `<span style="color: rgb(${r},${g},${b})">${char}</span>`;
+                        }
+                    }
+                    asciiHtml += '<br>';
+                }
+
+                asciiOutput.innerHTML = asciiHtml;
+            }, 50);
+        }
+
+        // 複製純文字
+        copyBtn.addEventListener('click', () => {
+            const text = asciiOutput.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ 已複製!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            });
+        });
+
+        // 下載 HTML
+        downloadBtn.addEventListener('click', () => {
+            const fontSize = fontSizeSlider.value;
+            const asciiContent = asciiOutput.innerHTML;
+            const htmlContent = '<!DOCTYPE html>\n' +
+                '<html>\n' +
+                '<head>\n' +
+                '    <meta charset="UTF-8">\n' +
+                '    <title>ASCII Art<\/title>\n' +
+                '    <style>\n' +
+                '        body {\n' +
+                '            background: #0a0a0a;\n' +
+                '            display: flex;\n' +
+                '            justify-content: center;\n' +
+                '            padding: 20px;\n' +
+                '        }\n' +
+                '        #ascii {\n' +
+                '            font-family: "Courier New", monospace;\n' +
+                '            font-size: ' + fontSize + 'px;\n' +
+                '            line-height: ' + fontSize + 'px;\n' +
+                '            letter-spacing: 0px;\n' +
+                '            white-space: pre;\n' +
+                '        }\n' +
+                '    <\/style>\n' +
+                '<\/head>\n' +
+                '<body>\n' +
+                '    <div id="ascii">' + asciiContent + '<\/div>\n' +
+                '<\/body>\n' +
+                '<\/html>';
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ascii-art.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
