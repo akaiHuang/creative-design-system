@@ -4,6 +4,10 @@
 
 Creative Design System 是一套瀏覽器端的創意工具箱，整合多種生成式視覺工具與復古美術工作流。適合設計師與創意團隊用於快速產出素材、建立一致的視覺風格，並加速概念設計與原型迭代。
 
+## About (EN)
+
+Creative Design System is a browser-based toolbox that combines multiple generative visual tools into one design workflow. It helps creative teams produce assets faster while keeping style exploration and output consistency in one place.
+
 ## 📋 Quick Summary
 
 > 🎨 **Creative Design System** 是一套整合了 **16 種生成式視覺工具** 的創意設計系統，專為創意團隊打造的瀏覽器端工具箱。🖼️ 涵蓋 8-bit 像素轉換器、ASCII 藝術生成器、精靈圖編輯器、外星角色工作室等多元工具，從復古像素美學到程序化生成藝術一應俱全。⚡ 基於 Next.js App Router 構建，搭配 HTML5 Canvas 與 Tailwind CSS，提供流暢的終端風格介面體驗。🛸 動態像素外星人 Logo 為導航中樞增添趣味，每個工具都針對特定視覺任務精心設計。📐 內附 FAW 品牌視覺風格指南，確保所有生成產出符合一致的品牌標準。💡 適合需要快速視覺探索、原型設計、以及品牌素材生成的創意工作者，無需離開瀏覽器即可完成從構思到產出的完整流程。🚀 不再依賴重量級設計軟體，讓創意隨時隨地爆發！
